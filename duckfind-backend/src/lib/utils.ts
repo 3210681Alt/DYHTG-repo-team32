@@ -32,3 +32,14 @@ export const clearToken = (res: Response) => {
 export const sendError = (res: Response, status: number, message: string) => {
   res.status(status).json({ status, message });
 };
+
+// Drizzle wraps driver errors, so the Postgres error may be on `cause`
+export function uniqueViolationConstraint(err: unknown): string | undefined {
+  for (const candidate of [err, (err as { cause?: unknown })?.cause]) {
+    const pgError = candidate as { code?: unknown; constraint?: unknown } | undefined;
+    if (pgError?.code === "23505" && typeof pgError.constraint === "string") {
+      return pgError.constraint;
+    }
+  }
+  return undefined;
+}

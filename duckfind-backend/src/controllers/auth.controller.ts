@@ -3,10 +3,23 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { db } from "../lib/db.js";
 import { hashPassword, verifyDummyPassword, verifyPassword } from "../lib/password.js";
-import { clearToken, generateToken, sendError } from "../lib/utils.js";
+import { clearToken, generateToken, sendError, uniqueViolationConstraint } from "../lib/utils.js";
 import { users } from "../models/user.model.js";
 
 const { passwordHash: _passwordHash, ...publicUserColumns } = getTableColumns(users);
+
+// Shared with the profile controller so email/password changes are validated like register
+export const emailSchema = z
+  .string({ error: "Email is required" })
+  .trim()
+  .toLowerCase()
+  .min(1, "Email is required")
+  .pipe(z.email("Please enter a valid email"));
+
+export const passwordSchema = z
+  .string({ error: "Password is required" })
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password must be at most 128 characters");
 
 const registerSchema = z.object(
   {
@@ -22,16 +35,8 @@ const registerSchema = z.object(
       .toLowerCase()
       .min(1, "Username is required")
       .regex(/^[a-z0-9_]{3,30}$/, "Username must be 3-30 letters, numbers or underscores"),
-    email: z
-      .string({ error: "Email is required" })
-      .trim()
-      .toLowerCase()
-      .min(1, "Email is required")
-      .pipe(z.email("Please enter a valid email")),
-    password: z
-      .string({ error: "Password is required" })
-      .min(8, "Password must be at least 8 characters")
-      .max(128, "Password must be at most 128 characters"),
+    email: emailSchema,
+    password: passwordSchema,
   },
   { error: "Invalid request body" },
 );
@@ -50,17 +55,6 @@ const loginSchema = z.object(
   },
   { error: "Invalid request body" },
 );
-
-// Drizzle wraps driver errors, so the Postgres error may be on `cause`
-function uniqueViolationConstraint(err: unknown): string | undefined {
-  for (const candidate of [err, (err as { cause?: unknown })?.cause]) {
-    const pgError = candidate as { code?: unknown; constraint?: unknown } | undefined;
-    if (pgError?.code === "23505" && typeof pgError.constraint === "string") {
-      return pgError.constraint;
-    }
-  }
-  return undefined;
-}
 
 export async function register(req: Request, res: Response) {
   const parsed = registerSchema.safeParse(req.body);
