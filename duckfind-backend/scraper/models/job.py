@@ -18,6 +18,10 @@ class Job:
     description_text: str
     departments: List[str] = field(default_factory=list)
     offices: List[str] = field(default_factory=list)
+    # Derived from title/location (see classify.py)
+    countries: List[str] = field(default_factory=list)
+    workplace: List[str] = field(default_factory=list)  # remote / hybrid / onsite
+    seniority: str = "mid"  # intern / graduate / junior / mid / senior / lead
     first_published_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -33,6 +37,9 @@ class Job:
             "descriptionText": self.description_text,
             "departments": self.departments,
             "offices": self.offices,
+            "countries": self.countries,
+            "workplace": self.workplace,
+            "seniority": self.seniority,
             "firstPublishedAt": self.first_published_at,
             "updatedAt": self.updated_at,
         }

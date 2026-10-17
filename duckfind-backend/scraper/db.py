@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import List, Tuple
 
 from bson import ObjectId
-from pymongo import ASCENDING, MongoClient, ReturnDocument, UpdateOne
+from pymongo import ASCENDING, DESCENDING, TEXT, MongoClient, ReturnDocument, UpdateOne
 from pymongo.database import Database
 
 from config import MONGODB_DB, MONGODB_URI
@@ -30,6 +30,16 @@ def ensure_indexes(db: Database) -> None:
     db.jobs.create_index([("companyId", ASCENDING), ("greenhouseId", ASCENDING)], unique=True)
     db.jobs.create_index("sponsorsVisa")
     db.jobs.create_index("isUk")
+    db.jobs.create_index([("firstPublishedAt", DESCENDING)])
+    for field in ("countries", "workplace", "seniority", "departments"):
+        db.jobs.create_index(field)
+    # Backs the API's `keywords` search; title matches count more than description matches
+    db.jobs.create_index(
+        [("title", TEXT), ("descriptionText", TEXT)],
+        name="jobs_text",
+        weights={"title": 10, "descriptionText": 1},
+        default_language="english",
+    )
 
 
 def known_board_tokens(db: Database) -> List[str]:

@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import { env } from "./lib/env.js";
+import { connectMongo } from "./lib/mongo.js";
 import { errorHandler, notFound } from "./middleware/error-handler.js";
 import { router } from "./routes/index.js";
 
@@ -20,6 +21,11 @@ app.use("/api", router);
 
 app.use(notFound);
 app.use(errorHandler);
+
+// Jobs routes need MongoDB; the rest of the API still works if it's down
+connectMongo().catch((err: unknown) => {
+  console.error("MongoDB connection failed, /api/jobs will return errors:", err);
+});
 
 app.listen(env.PORT, () => {
   console.log(`Api listening on http://localhost:${env.PORT}`);

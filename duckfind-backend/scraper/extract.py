@@ -7,19 +7,9 @@ import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from classify import countries_for, is_uk_location, seniority_for, workplace_for
 from models import Company, Job
 
-UK_PATTERN = re.compile(
-    r"\b(uk|u\.k\.|united kingdom|great britain|england|scotland|wales|northern ireland|"
-    r"london|manchester|edinburgh|glasgow|cardiff|bristol|cambridge|oxford|birmingham|leeds|"
-    r"belfast|liverpool|newcastle|sheffield|nottingham|reading|brighton|bath|milton keynes)\b",
-    re.IGNORECASE,
-)
-# Places that share a UK city's name
-NOT_UK_PATTERN = re.compile(
-    r"\b(massachusetts|ontario|kentucky|ohio|connecticut)\b|cambridge,\s*ma\b|london,\s*on\b",
-    re.IGNORECASE,
-)
 # Tags that separate words; inline tags like <strong> can sit inside a word ("<b>A</b>BOUT")
 BLOCK_TAG_PATTERN = re.compile(
     r"</?(p|div|br|li|ul|ol|h[1-6]|tr|td|th|table|section|blockquote|hr)\b[^>]*>", re.IGNORECASE
@@ -31,10 +21,6 @@ WHITESPACE_PATTERN = re.compile(r"\s+")
 def html_to_text(markup: str) -> str:
     text = TAG_PATTERN.sub("", BLOCK_TAG_PATTERN.sub(" ", markup))
     return WHITESPACE_PATTERN.sub(" ", html.unescape(text)).strip()
-
-
-def is_uk_location(name: str) -> bool:
-    return bool(name and UK_PATTERN.search(name) and not NOT_UK_PATTERN.search(name))
 
 
 def parse_datetime(value: Optional[str]) -> Optional[datetime]:
@@ -66,13 +52,18 @@ def extract_job(raw: Dict[str, Any]) -> Job:
     offices = [office.get("name", "") for office in raw.get("offices") or [] if office.get("name")]
     # The location is where the job is; offices often list every office of the company, so they
     # are only used when the location is missing
-    is_uk = is_uk_location(location) if location else any(is_uk_location(o) for o in offices)
+    place = location or "; ".join(offices)
+    countries = countries_for(place)
+    title = (raw.get("title") or "").strip()
 
     return Job(
         greenhouse_id=int(raw["id"]),
-        title=(raw.get("title") or "").strip(),
+        title=title,
         location=location,
-        is_uk=is_uk,
+        is_uk="United Kingdom" in countries,
+        countries=countries,
+        workplace=workplace_for(location, title),
+        seniority=seniority_for(title),
         url=raw.get("absolute_url") or "",
         description_html=description_html,
         description_text=html_to_text(description_html),

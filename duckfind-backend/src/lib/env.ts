@@ -13,6 +13,10 @@ const envSchema = z.object({
 
   GREENHOUSE_BOARD_TOKEN: z.string().min(1),
   GREENHOUSE_API_BASE_URL: z.url().default("https://boards-api.greenhouse.io/v1"),
+
+  // Scraped companies and jobs (written by scraper/)
+  MONGODB_URI: z.string().min(1).default("mongodb://localhost:27017"),
+  MONGODB_DB: z.string().min(1).default("duckfind"),
 });
 
 const parsed = envSchema.safeParse(process.env);
