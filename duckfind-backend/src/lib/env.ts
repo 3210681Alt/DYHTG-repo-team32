@@ -10,6 +10,9 @@ const envSchema = z.object({
     .string()
     .default("http://localhost:5173")
     .transform((value) => value.split(",").map((origin) => origin.trim())),
+
+  GREENHOUSE_BOARD_TOKEN: z.string().min(1),
+  GREENHOUSE_API_BASE_URL: z.url().default("https://boards-api.greenhouse.io/v1"),
 });
 
 const parsed = envSchema.safeParse(process.env);
