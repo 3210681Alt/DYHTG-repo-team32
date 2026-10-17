@@ -1,5 +1,17 @@
 import './App.css'
+import { useState } from 'react'
+
 function App() {
+  const [page, setPage] = useState("Menu")
+
+  if (page === "Page") {
+    return(
+      <div>
+        <h1>New page!</h1>
+      </div>
+    )
+  }
+
   return (
     <div>
       <nav className="navbar">
@@ -23,10 +35,14 @@ function App() {
           from multiple sources to find your best matches.
         </p>
 
-        <button>Find My Matches →</button>
+        <button onClick={() => {setPage("Page")}}>Find My Matches →</button>
       </main>
     </div>
   )
 }
 
+// export default App
 export default App
+
+
+
