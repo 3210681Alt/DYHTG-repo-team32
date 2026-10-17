@@ -22,7 +22,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "scrape": "scraper/.venv/bin/python scraper/main.py",
+    "scrape:once": "scraper/.venv/bin/python scraper/main.py --once",
+    "scrape:setup": "python3 -m venv scraper/.venv && scraper/.venv/bin/pip install -r scraper/requirements.txt"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

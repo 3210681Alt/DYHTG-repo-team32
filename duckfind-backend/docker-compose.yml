@@ -16,5 +16,20 @@ services:
       timeout: 5s
       retries: 10
 
+  # Companies and job listings written by the scraper (see scraper/)
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   pgdata:
+  mongodata:

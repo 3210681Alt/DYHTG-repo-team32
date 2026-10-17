@@ -6,3 +6,8 @@ coverage/
 !.env.example
 *.log
 .DS_Store
+
+# Python scraper
+scraper/.venv/
+scraper/data/
+__pycache__/
