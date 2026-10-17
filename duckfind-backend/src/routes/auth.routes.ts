@@ -9,7 +9,7 @@ const credentialsLimiter = rateLimit({
   limit: 20,
   standardHeaders: "draft-8",
   legacyHeaders: false,
-  message: { error: "Too many attempts, please try again later" },
+  message: { status: 429, message: "Too many attempts, please try again later" },
 });
 
 export const authRouter = Router();

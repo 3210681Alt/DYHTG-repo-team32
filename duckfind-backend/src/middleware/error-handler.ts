@@ -1,27 +1,19 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
-import { z } from "zod";
-import { env } from "../lib/env.js";
-import { HttpError } from "../lib/http-error.js";
+import { sendError } from "../lib/utils.js";
 
-export const notFound: RequestHandler = (req, res) => {
-  res.status(404).json({ error: `Not found: ${req.method} ${req.path}` });
+export const notFound: RequestHandler = (_req, res) => {
+  sendError(res, 404, "Route not found");
 };
 
+// Safety net for anything a controller didn't handle itself; never exposes error details
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-  if (err instanceof z.ZodError) {
-    res.status(400).json({ error: "Validation failed", details: z.flattenError(err) });
-    return;
-  }
-
-  // Also covers 4xx errors raised by Express itself, e.g. malformed JSON bodies
-  if (err instanceof HttpError || (typeof err?.status === "number" && err.status < 500)) {
-    res.status(err.status).json({ error: err.message });
-    return;
+  // 4xx errors raised by Express itself, e.g. a malformed JSON body
+  if (typeof err?.status === "number" && err.status >= 400 && err.status < 500) {
+    const message =
+      err.type === "entity.parse.failed" ? "Invalid JSON in request body" : "Bad request";
+    return sendError(res, err.status, message);
   }
 
   console.error(err);
-  res.status(500).json({
-    error: "Internal server error",
-    ...(env.NODE_ENV !== "production" && err instanceof Error && { message: err.message }),
-  });
+  sendError(res, 500, "Internal server error");
 };

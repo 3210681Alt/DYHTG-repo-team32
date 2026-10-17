@@ -4,8 +4,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { db } from "../lib/db.js";
 import { env } from "../lib/env.js";
-import { HttpError } from "../lib/http-error.js";
-import { TOKEN_COOKIE } from "../lib/utils.js";
+import { sendError, TOKEN_COOKIE } from "../lib/utils.js";
 import { users } from "../models/user.model.js";
 
 const payloadSchema = z.object({ user: z.object({ id: z.uuid() }) });
@@ -22,15 +21,19 @@ function getUserId(token: unknown): string | null {
   }
 }
 
-const verifyToken: RequestHandler = async (req, _res, next) => {
+const verifyToken: RequestHandler = async (req, res, next) => {
   const userId = getUserId(req.cookies?.[TOKEN_COOKIE]);
-  if (!userId) throw new HttpError(401, "Unauthorized - Invalid or missing token");
+  if (!userId) {
+    return sendError(res, 401, "Unauthorized - Invalid or missing token");
+  }
 
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: { passwordHash: false },
   });
-  if (!user) throw new HttpError(401, "Unauthorized - User not found");
+  if (!user) {
+    return sendError(res, 401, "Unauthorized - User not found");
+  }
 
   req.user = user;
   next();

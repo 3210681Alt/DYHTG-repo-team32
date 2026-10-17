@@ -27,3 +27,8 @@ export const generateToken = (user: TokenPayload, res: Response) => {
 export const clearToken = (res: Response) => {
   res.clearCookie(TOKEN_COOKIE, tokenCookieOptions);
 };
+
+// Every error response has the shape { status, message }
+export const sendError = (res: Response, status: number, message: string) => {
+  res.status(status).json({ status, message });
+};
