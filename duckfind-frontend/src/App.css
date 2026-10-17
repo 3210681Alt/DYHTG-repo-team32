@@ -30,6 +30,12 @@
   cursor: pointer;
 }
 
+.nav-icon button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;;
+}
+
 .nav-buttons button:hover {
   background-color: #f3f4f6;
 }
