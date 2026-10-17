@@ -119,6 +119,11 @@ export async function updatePassword(req: Request, res: Response) {
 
   const { currentPassword, newPassword } = parsed.data;
 
+  // Checked before any database query
+  if (currentPassword === newPassword) {
+    return sendError(res, 400, "New password must be different from current password");
+  }
+
   if (!(await isCurrentPassword(req.user.id, currentPassword))) {
     return sendError(res, 401, "Current password is incorrect");
   }

@@ -4,7 +4,7 @@ import { checkAuth, login, logout, register } from "../controllers/auth.controll
 import verifyToken from "../middleware/verifyToken.middleware.js";
 
 // security against password guessing
-const credentialsLimiter = rateLimit({
+export const credentialsLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   standardHeaders: "draft-8",
