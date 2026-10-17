@@ -82,3 +82,12 @@ main>button {
 main>button:hover {
   background-color: #eab308;
 }
+
+.result {
+  text-align: left;
+  background-color: gray;
+  padding: 10px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 12px;
+}
