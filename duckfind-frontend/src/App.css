@@ -91,9 +91,13 @@
 
 .result {
   text-align: left;
-  background-color: gray;
   padding: 10px 20px;
   max-width: 900px;
   margin: 0 auto;
   border-radius: 12px;
+  line-height: 3px;
+}
+
+.result>h1 {
+  line-height: 15px;
 }
