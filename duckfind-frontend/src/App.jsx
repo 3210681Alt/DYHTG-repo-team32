@@ -3,6 +3,7 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import duckfindIcon from '@/assets/duckfindicon.png'
+import darkfindIcon from '@/assets/duckfindiconsplendid.png'
 import { Duck, Waves } from '@/components/Duck'
 import RequireAuth from '@/components/RequireAuth'
 import { PageLoading } from '@/components/States'
@@ -103,7 +104,7 @@ function ThemeToggle() {
 // The navbar from the first version of DuckFind: logo on the left, the main pages next to it
 function Navbar() {
   const { user, loading } = useAuth()
-
+  const dark = theme === 'dark'
   return (
     <header className="sticky top-0 z-40 border-b-2 border-ink bg-card">
       <nav
@@ -111,7 +112,7 @@ function Navbar() {
         className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-3 px-5 py-3 sm:gap-x-6"
       >
         <Link to="/" className="shrink-0">
-          <img src={duckfindIcon} alt="Duckfind home" className="h-6 w-auto sm:h-8" />
+          <img src={dark ? duckfindIcon : darkfindIcon} alt="Duckfind home" className="h-6 w-auto sm:h-8" />
         </Link>
 
         <div className="order-last grid w-full grid-cols-3 gap-2 sm:flex lg:order-none lg:ml-auto lg:w-auto">
