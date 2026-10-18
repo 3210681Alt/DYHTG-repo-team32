@@ -36,6 +36,28 @@ function NavBar({page, setPage}) {
   )
 }
 
+function joblist() {
+  const htmltorender = ""
+    for (let i = 0; i < testdata.length; i++) {
+      let tagstxt = ""
+      for (let tag = 0; tag < testdata[i].tags.length; tag++) {
+        tagstxt += testdata[i].tags[tag] + "  "  
+      }
+      <style>{
+        ".result {background-color: gray;}"
+      }
+      </style>
+      <div className="result">
+        <h1>{testdata[i].title}</h1>
+        <h2>{testdata[i].provider}</h2>
+        <p>{tagstxt}</p>
+      </div>
+  return (
+    <ul>{htmltorender)</ul>
+  )
+  }
+}
+
 function WebPages({status, setPage}) {
   if (status === "Menu") {
     return(
@@ -50,26 +72,9 @@ function WebPages({status, setPage}) {
       </main>
     )
   } else if (status === "Page") { // Matthew's code here
-    let htmltorender = ``
-    for (let i = 0; i < testdata.length; i++) {
-      let tagstxt = ""
-      for (let tag = 0; tag < testdata[i].tags.length; tag++) {
-        tagstxt += testdata[i].tags[tag] + "  "  
-      }
-      htmltorender += `
-      <style>{
-        ".result {background-color: gray;}"
-      }
-      </style>
-      <div className="result">
-        <h1>`+testdata[i].title+`</h1>
-        <h2>`+testdata[i].provider+`</h2>
-        <p>`+tagstxt+`</p>
-      </div>`
-    }
     return (
       <main>
-        <div dangerouslySetInnerHTML={{__html: htmltorender}} />
+        <htmltorender />
       </main>
     )
   } else {
