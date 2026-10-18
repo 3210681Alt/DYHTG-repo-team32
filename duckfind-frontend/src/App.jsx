@@ -57,6 +57,10 @@ function WebPages({status, setPage}) {
       }
       return(
         <div className="result">
+          <style>{
+            ".result {background-color: gray;}"
+            }
+          </style>
           <h1>{testdata[i].title}</h1>
           <h2>{testdata[i].provider}</h2>
           <p>{tagstxt}</p>
