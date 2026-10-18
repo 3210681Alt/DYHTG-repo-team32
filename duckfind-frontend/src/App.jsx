@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import duckfindIcon from '@/assets/duckfindicon.png'
 import { Duck, Waves } from '@/components/Duck'
 import RequireAuth from '@/components/RequireAuth'
 import { PageLoading } from '@/components/States'
@@ -109,8 +110,8 @@ function Navbar() {
         aria-label="Main"
         className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-3 px-5 py-3 sm:gap-x-6"
       >
-        <Link to="/" className="text-xl leading-none font-black tracking-tight font-wide sm:text-2xl">
-          Duckfind<span aria-hidden="true">🐥</span>
+        <Link to="/" className="shrink-0">
+          <img src={duckfindIcon} alt="Duckfind home" className="h-6 w-auto sm:h-8" />
         </Link>
 
         <div className="order-last grid w-full grid-cols-3 gap-2 sm:flex lg:order-none lg:ml-auto lg:w-auto">
