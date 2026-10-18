@@ -1,0 +1,249 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/* Archivo with its width axis, so headings can be extra wide */
+@import "@fontsource-variable/archivo/wdth.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  DuckFind theme: a friendly brutalist look.
+  The yellow, ink, paper and grey are the colours from the first version of the site.
+*/
+:root {
+  --duck: #facc15;
+  --duck-dark: #eab308;
+  --duck-pale: #fef9c3;
+  /* Text on yellow: stays dark in both themes */
+  --duck-ink: #111827;
+  /* Duck bill orange, for small highlights like "New" */
+  --bill: #fb923c;
+  /* Pond water, for the footer */
+  --water: #dbeafe;
+  /* Text, borders and hard shadows */
+  --ink: #111827;
+  --paper: #f8fafc;
+  --pond: #1d4ed8;
+  --stamp: #b91c1c;
+  --gold: #8a6400;
+
+  /* shadcn components read these names */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--duck);
+  --primary-foreground: var(--duck-ink);
+  --secondary: var(--duck-pale);
+  --secondary-foreground: var(--ink);
+  --muted: #f1f5f9;
+  --muted-foreground: #4b5563;
+  --accent: var(--duck-pale);
+  --accent-foreground: var(--ink);
+  --destructive: var(--stamp);
+  --border: var(--ink);
+  --input: var(--ink);
+  --ring: var(--ink);
+  --radius: 0.25rem;
+}
+
+/*
+  Dark mode ("night pond"): the old ink colour becomes the page, and text, borders and shadows
+  turn light. The duck stays yellow. Every text colour here is at least 5:1 contrast (WCAG AA).
+*/
+.dark {
+  color-scheme: dark;
+  --duck-pale: #4a3b0b;
+  --water: #172554;
+  --ink: #f1f5f9;
+  --pond: #93c5fd;
+  --stamp: #fca5a5;
+  --gold: var(--duck);
+
+  --background: #111827;
+  --card: #1e293b;
+  --popover: #1e293b;
+  --muted: #334155;
+  --muted-foreground: #b6c2d1;
+}
+
+@theme inline {
+  --font-sans: 'Archivo Variable', Arial, Helvetica, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-duck: var(--duck);
+  --color-duck-dark: var(--duck-dark);
+  --color-duck-pale: var(--duck-pale);
+  --color-duck-ink: var(--duck-ink);
+  --color-bill: var(--bill);
+  --color-water: var(--water);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-pond: var(--pond);
+  --color-stamp: var(--stamp);
+  --color-gold: var(--gold);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+
+  /* Hard shadows with no blur: the brutalist signature */
+  --shadow-brutal-sm: 2px 2px 0 0 var(--ink);
+  --shadow-brutal: 4px 4px 0 0 var(--ink);
+  --shadow-brutal-lg: 6px 6px 0 0 var(--ink);
+}
+
+/* Extra-wide letters for big headings */
+@utility font-wide {
+  font-stretch: 125%;
+}
+
+/* A duck bobbing on the water (the reduced-motion rule below stops it) */
+@keyframes duck-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(3deg);
+  }
+}
+
+@utility animate-duck-bob {
+  animation: duck-bob 1.8s ease-in-out infinite;
+}
+
+/* Bobs a few times when the page opens, then sits still */
+@utility animate-duck-bob-once {
+  animation: duck-bob 1.8s ease-in-out 3;
+}
+
+/* Job descriptions are HTML from other companies, so they get simple, readable styles here */
+@layer components {
+  .job-description {
+    max-width: 70ch;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+
+  .job-description > * + * {
+    margin-top: 1em;
+  }
+
+  .job-description h3,
+  .job-description h4,
+  .job-description h5,
+  .job-description h6 {
+    margin-top: 1.75em;
+    font-weight: 800;
+    font-size: 1.1em;
+    line-height: 1.3;
+  }
+
+  .job-description ul,
+  .job-description ol {
+    padding-left: 1.4em;
+  }
+
+  .job-description ul {
+    list-style: square;
+  }
+
+  .job-description ol {
+    list-style: decimal;
+  }
+
+  .job-description li + li {
+    margin-top: 0.35em;
+  }
+
+  .job-description a {
+    color: var(--pond);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .job-description strong,
+  .job-description b {
+    font-weight: 700;
+  }
+
+  .job-description img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Selected text is highlighted duck yellow */
+  ::selection {
+    background-color: var(--duck);
+    color: var(--duck-ink);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/*
+  These two rules sit outside any layer on purpose, so they win over component styles.
+*/
+
+/* One clear focus outline for keyboard users, on every button, link and input */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Except where focus is only moved for screen readers (the page heading after navigating) */
+[tabindex="-1"]:focus-visible {
+  outline: none;
+}
+
+/* No movement for people who ask their device for less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
