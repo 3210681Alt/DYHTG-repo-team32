@@ -50,23 +50,28 @@ function WebPages({status, setPage}) {
       </main>
     )
   } else if (status === "Page") { // Matthew's code here
+    let htmltorender = ``
     for (let i = 0; i < testdata.length; i++) {
       let tagstxt = ""
       for (let tag = 0; tag < testdata[i].tags.length; tag++) {
         tagstxt += testdata[i].tags[tag] + "  "  
       }
-      return(
-        <div className="result">
-          <style>{
-            ".result {background-color: gray;}"
-            }
-          </style>
-          <h1>{testdata[i].title}</h1>
-          <h2>{testdata[i].provider}</h2>
-          <p>{tagstxt}</p>
-        </div>
-      )
+      htmltorender += `
+      <style>{
+        ".result {background-color: gray;}"
+      }
+      </style>
+      <div className="result">
+        <h1>`+testdata[i].title+`</h1>
+        <h2>`+testdata[i].provider+`</h2>
+        <p>`+tagstxt+`</p>
+      </div>`
     }
+    return (
+      <main>
+        <div dangerouslySetInnerHTML={{__html: htmltorender}} />
+      </main>
+    )
   } else {
     alert("No such page!")
   }
