@@ -5,6 +5,31 @@ import VisaStamp from '@/components/VisaStamp'
 import { useMyJobs } from '@/context/myJobs'
 import { closingInfo, isNew, postedLabel, VISA_TAG } from '@/lib/internship'
 
+// Why a job is on My matches: its score, the skills it asks for that you have, and the ones you don't
+function MatchSummary({ match }) {
+  const missing = match.missing.slice(0, 4)
+
+  return (
+    <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-t-2 border-dashed border-ink pt-4 text-sm">
+      <span className="rounded-md border-2 border-ink bg-duck px-2 py-0.5 font-black text-duck-ink">
+        {match.score}% match
+      </span>
+      {match.levelFit && <span className="font-bold">Fits your level</span>}
+      {match.matched.length > 0 && (
+        <span>
+          <span className="font-bold">You have:</span> {match.matched.join(', ')}
+        </span>
+      )}
+      {missing.length > 0 && (
+        <span className="text-muted-foreground">
+          <span className="font-bold">Also asks for:</span> {missing.join(', ')}
+          {match.missing.length > missing.length && ` and ${match.missing.length - missing.length} more`}
+        </span>
+      )}
+    </div>
+  )
+}
+
 // One result in a list. Takes an Internship (see lib/internship.js).
 // Jobs the user marked "Not interested" disappear straight away (unless showHidden is set).
 export default function JobCard({ internship, showHidden = false }) {
@@ -40,6 +65,8 @@ export default function JobCard({ internship, showHidden = false }) {
         </div>
         {sponsor && <VisaStamp className="shrink-0 self-start sm:mt-1" />}
       </div>
+
+      {internship.match && <MatchSummary match={internship.match} />}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {isNew(internship.postedAt) && <Badge className="bg-bill text-duck-ink">New</Badge>}

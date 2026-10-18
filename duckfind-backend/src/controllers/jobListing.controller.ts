@@ -3,11 +3,13 @@ import type { Request, Response } from "express";
 import { isValidObjectId, type Types } from "mongoose";
 import { z } from "zod";
 import { db } from "../lib/db.js";
-import { COMPANY_FIELDS, withCompany } from "../lib/jobs.js";
+import { COMPANY_FIELDS, hiddenJobIds, withCompany } from "../lib/jobs.js";
+import { levelsFromEducation, scoreJob, type MatchProfile } from "../lib/matching.js";
+import { findSkill } from "../lib/skills.js";
 import { sendError } from "../lib/utils.js";
 import { CompanyModel } from "../models/company.model.js";
-import { hiddenJobs } from "../models/hiddenJob.model.js";
 import { JobModel } from "../models/job.model.js";
+import { userUniversities } from "../models/user.model.js";
 
 export const SENIORITY_LEVELS = ["intern", "graduate", "junior", "mid", "senior", "lead"] as const;
 export const WORKPLACE_TYPES = ["remote", "hybrid", "onsite"] as const;
@@ -113,11 +115,7 @@ export async function listJobs(req: Request, res: Response) {
 
   // Logged-in users don't see jobs they marked "Not interested"
   if (req.user?.id) {
-    const hidden = await db
-      .select({ jobId: hiddenJobs.jobId })
-      .from(hiddenJobs)
-      .where(eq(hiddenJobs.userId, req.user.id));
-    const hiddenIds = hidden.map((row) => row.jobId).filter((id) => isValidObjectId(id));
+    const hiddenIds = await hiddenJobIds(req.user.id);
     if (hiddenIds.length) filter._id = { $nin: hiddenIds };
   }
 
@@ -175,6 +173,88 @@ export async function listJobs(req: Request, res: Response) {
     limit,
     total,
     totalPages: Math.ceil(total / limit),
+  });
+}
+
+// How many jobs the text search hands over for scoring; matches are ranked within these
+const MATCH_CANDIDATES = 300;
+
+const listMatchesSchema = z.object({
+  from: z.enum(["skills", "cv"], { error: "from must be skills or cv" }).default("skills"),
+  sponsors: booleanFlag("sponsors"),
+  uk: booleanFlag("uk"),
+  seniority: enumList("seniority", SENIORITY_LEVELS),
+  page: listJobsSchema.shape.page,
+  limit: listJobsSchema.shape.limit,
+});
+
+// Jobs ranked by how well they fit the user's skills or CV and their education level (lib/matching.ts)
+export async function listMatches(req: Request, res: Response) {
+  const parsed = listMatchesSchema.safeParse(req.query);
+  if (!parsed.success) {
+    return sendError(res, 400, parsed.error.issues[0]?.message ?? "Invalid query");
+  }
+  const query = parsed.data;
+  const { page, limit } = query;
+  const user = req.user;
+
+  // From the CV: its skills, plus the other words it uses a lot (used for job titles)
+  const fromCv = query.from === "cv";
+  const source = fromCv ? user.resumeKeywords : user.skills;
+  if (!source.length) {
+    return sendError(
+      res,
+      404,
+      fromCv ? "You haven't uploaded a CV yet" : "Add some skills to your profile first",
+    );
+  }
+  const skills = source.map(findSkill).filter((skill) => skill !== undefined);
+  const words = fromCv ? source.filter((keyword) => !findSkill(keyword)) : [];
+
+  const education = await db
+    .select({ status: userUniversities.status, graduationDate: userUniversities.graduationDate })
+    .from(userUniversities)
+    .where(eq(userUniversities.userId, user.id));
+  const profile: MatchProfile = { skills, words, levels: levelsFromEducation(education) };
+
+  const filter: Record<string, unknown> = { $text: { $search: source.join(" ") } };
+  if (query.sponsors) filter.sponsorsVisa = query.sponsors === "true";
+  if (query.uk) filter.isUk = query.uk === "true";
+  if (query.seniority?.length) filter.seniority = { $in: query.seniority };
+  const hiddenIds = await hiddenJobIds(user.id);
+  if (hiddenIds.length) filter._id = { $nin: hiddenIds };
+
+  const candidates = await JobModel.find(filter, {
+    descriptionHtml: 0,
+    lastSeenAt: 0,
+    __v: 0,
+    score: { $meta: "textScore" },
+  })
+    .sort({ score: { $meta: "textScore" }, _id: 1 })
+    .limit(MATCH_CANDIDATES)
+    .lean<(Record<string, unknown> & { title: string; score?: number })[]>();
+
+  const bestTextScore = candidates[0]?.score ?? 0;
+  const ranked = candidates
+    .map((job) => ({ job, match: scoreJob(job, profile, bestTextScore) }))
+    .filter((entry) => entry.match !== null)
+    .sort((a, b) => b.match!.score - a.match!.score);
+
+  const pageOfJobs = ranked.slice((page - 1) * limit, page * limit).map(({ job, match }) => {
+    // The description was only needed for scoring
+    const { descriptionText: _text, score: _score, ...rest } = job;
+    return { ...rest, match };
+  });
+  await JobModel.populate(pageOfJobs, { path: "companyId", select: COMPANY_FIELDS });
+
+  res.status(200).json({
+    status: 200,
+    message: "Matches fetched",
+    jobs: pageOfJobs.map(withCompany),
+    page,
+    limit,
+    total: ranked.length,
+    totalPages: Math.ceil(ranked.length / limit),
   });
 }
 
