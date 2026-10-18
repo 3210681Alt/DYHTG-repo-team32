@@ -40,14 +40,14 @@
   background-color: #f3f4f6;
 }
 
-main {
+.main-page {
   text-align: center;
   padding: 120px 20px;
   max-width: 900px;
   margin: 0 auto;
 }
 
-main>p:first-child {
+.main-page>p:first-child {
   font-size: 14px;
   font-weight: bold;
   letter-spacing: 2px;
@@ -55,14 +55,14 @@ main>p:first-child {
   margin-bottom: 20px;
 }
 
-main h1 {
+.main-page h1 {
   font-size: 64px;
   line-height: 1.05;
   margin: 0 0 24px;
   letter-spacing: -2px;
 }
 
-main h1+p {
+.main-page h1+p {
   font-size: 19px;
   line-height: 1.6;
   color: #6b7280;
@@ -70,7 +70,7 @@ main h1+p {
   margin: 0 auto 32px;
 }
 
-main>button {
+.main-page>button {
   background-color: #facc15;
   color: #111827;
 
@@ -85,7 +85,7 @@ main>button {
   cursor: pointer;
 }
 
-main>button:hover {
+.main-page>button:hover {
   background-color: #eab308;
 }
 

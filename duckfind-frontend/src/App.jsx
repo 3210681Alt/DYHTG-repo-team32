@@ -1,4 +1,7 @@
 import './App.css'
+import { useState } from 'react'
+import titleImg from "./duckfindicon.png" // Icon
+
 class Internship {
   constructor(title, provider, email, phone, desc, address, source, requirements, link, tags) {
     this.title = title
@@ -17,12 +20,36 @@ const testdata = []
 for (let i = 0; i < 10; i++) {
   testdata.push(new Internship("Test Internship", "Matthew Fraser Tech Company", "6767@gmail.com", "+44 12345 678910", "Apply pls", "21 Internship Ln, Glasgow, Scotland", "Internships.com", "A in Higher Maths", "https://www.internships.com/test-internship", ["Summer", "Unpaid"]))
 }
-import { useState } from 'react'
 
-function App() {
-  const [page, setPage] = useState("Menu")
+function NavBar({page, setPage}) {
+  return (
+    <nav className="navbar">
+      <div className="nav-icon">
+        <button onClick={() => {setPage("Menu")}}><img src={titleImg} alt="Duckfind🐥" width="125px"/></button>
+      </div>
 
-  if (page === "Page") { // Matthew's code here
+      <div className="nav-buttons">
+        <button>Browse Internships</button>
+        <button>My Matches</button>
+      </div>
+    </nav>
+  )
+}
+
+function WebPages({status, setPage}) {
+  if (status === "Menu") {
+    return(
+      <main>
+        <div className="main-page">
+          <p>INTERNSHIPS, PERSONALISED FOR YOU</p>
+          <h1>Find internships that actually fit you.</h1>
+          <p>Tell us about yourself and we'll compare opportunities from multiple sources to find your best matches.</p>
+
+          <button onClick={() => {setPage("Page")}}>Find My Matches →</button>
+        </div>
+      </main>
+    )
+  } else if (status === "Page") { // Matthew's code here
     for (let i = 0; i < testdata.length; i++) {
       let tagstxt = ""
       for (let tag = 0; tag < testdata[i].tags.length; tag++) {
@@ -36,47 +63,6 @@ function App() {
         </div>
       )
     }
-  }
-
-  return (
-    <nav className="navbar">
-      <div className="nav-icon">
-        <button onClick={() => {setPage("Menu")}}><img src={titleImg} alt="Duckfind🐥" width="125px"/></button>
-      </div>
-      <div className="nav-buttons">
-        <button>Browse Internships</button>
-        <button>My Matches</button>
-      </div>
-    </nav>
-  )
-}
-
-function WebPages({status, setPage}) {
-  if (status === "Menu") {
-    return(
-      <main>
-        <p>INTERNSHIPS, PERSONALISED FOR YOU</p>
-
-          <h1>
-            Find internships that actually fit you.
-          </h1>
-
-          <p>
-            Tell us about yourself and we'll compare opportunities
-            from multiple sources to find your best matches.
-          </p>
-
-          <button onClick={() => {setPage("Page")}}>Find My Matches →</button>
-      </main>
-    )
-  } else if (status === "Page") {
-    return(
-      <main>
-        <div>
-          <h1>New page!</h1>
-        </div>
-      </main>
-    )
   } else {
     alert("No such page!")
   }
