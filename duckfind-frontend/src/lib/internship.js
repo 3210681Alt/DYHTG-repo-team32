@@ -1,8 +1,8 @@
 // The Internship class from the first version of DuckFind.
 // `id`, `postedAt` and `closingDate` were added at the end so results can link to their own page
-// and show their dates.
+// and show their dates; `match` is how well the job fits the user (only on My matches).
 export class Internship {
-  constructor(title, provider, email, phone, desc, address, source, requirements, link, tags, id, postedAt, closingDate) {
+  constructor(title, provider, email, phone, desc, address, source, requirements, link, tags, id, postedAt, closingDate, match) {
     this.title = title
     this.provider = provider
     this.email = email
@@ -16,6 +16,7 @@ export class Internship {
     this.id = id
     this.postedAt = postedAt
     this.closingDate = closingDate
+    this.match = match
   }
 }
 
@@ -62,6 +63,7 @@ export function toInternship(job) {
     job._id,
     job.firstPublishedAt,
     job.closingDate,
+    job.match,
   )
 }
 

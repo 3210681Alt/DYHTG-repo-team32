@@ -1,5 +1,5 @@
 import { extractText, getDocumentProxy } from "unpdf";
-import { SKILLS } from "./skills.js";
+import { findSkillsIn } from "./skills.js";
 
 // Turns a CV into search keywords for finding matching jobs:
 // skills from DuckFind's list that appear in it, then the words it uses most.
@@ -22,12 +22,6 @@ college school degree grade grades achieved including various responsible role r
 teams using used help helped well good great strong excellent able ability`.split(/\s+/),
 );
 
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-// "C++" or "Node.js" need their own word boundaries, so \b on its own won't do
-const skillPattern = (skill: string) =>
-  new RegExp(`(^|[^a-z0-9+#.])${escapeRegex(skill.toLowerCase())}(?=$|[^a-z0-9+#])`, "i");
-
 export async function pdfToText(file: Buffer): Promise<string> {
   const pdf = await getDocumentProxy(new Uint8Array(file));
   const { text } = await extractText(pdf, { mergePages: true });
@@ -36,8 +30,9 @@ export async function pdfToText(file: Buffer): Promise<string> {
 
 export function keywordsFromText(text: string): string[] {
   // Email addresses and links would add words like the user's name or "gmail"
-  const lower = text.toLowerCase().replace(/\S+@\S+|\S*(https?:\/\/|www\.|\.com|\.io)\S*/g, " ");
-  const skills = SKILLS.filter((skill) => skillPattern(skill).test(lower));
+  const cleaned = text.replace(/\S+@\S+|\S*(https?:\/\/|www\.|\.com|\.io)\S*/gi, " ");
+  const lower = cleaned.toLowerCase();
+  const skills = findSkillsIn(cleaned);
 
   // Count the remaining words (letters only, at least 4 long) and keep the ones used most
   const counts = new Map<string, number>();

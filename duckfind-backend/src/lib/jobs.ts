@@ -1,5 +1,8 @@
+import { eq } from "drizzle-orm";
 import { isValidObjectId } from "mongoose";
+import { hiddenJobs } from "../models/hiddenJob.model.js";
 import { JobModel } from "../models/job.model.js";
+import { db } from "./db.js";
 
 // Company fields included with every job in a list
 export const COMPANY_FIELDS = "name boardToken boardUrl sponsorsVisa";
@@ -40,4 +43,13 @@ export async function findJobSummary(jobId: string) {
   if (!job) return null;
 
   return { jobTitle: job.title, companyName: job.companyId?.name ?? "", jobUrl: job.url ?? "" };
+}
+
+// Ids of the jobs a user marked "Not interested", to leave out of their lists
+export async function hiddenJobIds(userId: string) {
+  const hidden = await db
+    .select({ jobId: hiddenJobs.jobId })
+    .from(hiddenJobs)
+    .where(eq(hiddenJobs.userId, userId));
+  return hidden.map((row) => row.jobId).filter((id) => isValidObjectId(id));
 }

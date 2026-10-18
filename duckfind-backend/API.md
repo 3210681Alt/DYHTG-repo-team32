@@ -311,6 +311,32 @@ e.g. `/jobs?sponsors=true&uk=true&seniority=intern,graduate`
 `400` `{ "status": 400, "message": "seniority must be one of: intern, graduate, junior, mid, senior, lead" }`
 `404` `{ "status": 404, "message": "Company not found" }`
 
+### GET `/jobs/matches` 🔒
+
+Jobs ranked by how well they fit you, best first. Each job gets a `match` score out of 100 from:
+the share of the skills it asks for that you have, how many of your skills it uses, your skills or
+CV words in its title, whether its level fits your education (students: intern/graduate; senior
+and lead roles are pushed down), and how often it mentions you. The top 300 text matches are
+scored; jobs sharing no skill and nothing in the title are left out. "Not interested" jobs are
+left out too.
+
+| Param       | Example                                   |
+| ----------- | ----------------------------------------- |
+| `from`      | `skills` (profile skills, default) / `cv` |
+| `sponsors`  | `true` / `false`                          |
+| `uk`        | `true` / `false`                          |
+| `seniority` | `intern,graduate,junior`                  |
+| `page`      | `1`                                       |
+| `limit`     | `20` (max 100)                            |
+
+`200` Same as `GET /jobs`, with `"message": "Matches fetched"` and a `match` on every job:
+
+```json
+"match": { "score": 76, "matched": ["Python", "SQL"], "missing": ["Machine Learning"], "levelFit": true }
+```
+
+`404` `{ "status": 404, "message": "You haven't uploaded a CV yet" }` (or "Add some skills to your profile first")
+
 ### GET `/jobs/filters`
 
 `200`

@@ -22,7 +22,7 @@ const SOURCES = {
     tab: 'From your skills',
     label: 'Your skills',
     edit: 'Edit skills',
-    intro: 'Jobs that mention your skills, with the best matches first.',
+    intro: 'Jobs that ask for your skills at your level, with the best matches first.',
     emptyTitle: 'Add your skills to see matches',
     emptyText: 'We use the skills on your profile to find jobs that ask for them.',
     emptyAction: 'Add skills',
@@ -38,8 +38,8 @@ const SOURCES = {
   },
 }
 
-// Matches are jobs that mention the user's skills or what's in their CV, best match first
-// (GET /api/jobs?keywords=...&sort=relevance)
+// Matches are jobs scored on the user's skills or CV and their education, best match first
+// (GET /api/jobs/matches?from=skills|cv)
 export default function Matches() {
   usePageTitle('My matches')
   const { user } = useAuth()
@@ -55,10 +55,9 @@ export default function Matches() {
   const page = Math.max(1, Number(params.get('page')) || 1)
 
   const path = skills.length
-    ? '/jobs?' +
+    ? '/jobs/matches?' +
       toQuery({
-        keywords: skills.join(' '),
-        sort: 'relevance',
+        from: from === 'cv' ? 'cv' : '',
         sponsors: sponsorsOnly ? 'true' : '',
         uk: ukOnly ? 'true' : '',
         seniority: earlyCareer ? 'intern,graduate,junior' : '',
