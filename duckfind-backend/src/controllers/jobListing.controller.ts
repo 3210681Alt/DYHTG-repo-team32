@@ -1,8 +1,12 @@
+import { eq } from "drizzle-orm";
 import type { Request, Response } from "express";
 import { isValidObjectId, type Types } from "mongoose";
 import { z } from "zod";
+import { db } from "../lib/db.js";
+import { COMPANY_FIELDS, withCompany } from "../lib/jobs.js";
 import { sendError } from "../lib/utils.js";
 import { CompanyModel } from "../models/company.model.js";
+import { hiddenJobs } from "../models/hiddenJob.model.js";
 import { JobModel } from "../models/job.model.js";
 
 export const SENIORITY_LEVELS = ["intern", "graduate", "junior", "mid", "senior", "lead"] as const;
@@ -50,7 +54,8 @@ const listJobsSchema = z.object({
   keywords: text("keywords", 200),
   location: text("location"),
   company: list("company"),
-  department: list("department"),
+  // One department, not a list: some department names contain commas
+  department: text("department", 200),
   country: list("country"),
   workplace: enumList("workplace", WORKPLACE_TYPES),
   seniority: enumList("seniority", SENIORITY_LEVELS),
@@ -79,17 +84,9 @@ const listJobsSchema = z.object({
     .default(20),
 });
 
-const COMPANY_FIELDS = "name boardToken boardUrl sponsorsVisa";
-
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Case-insensitive exact match, so "engineering" finds "Engineering"
 const exactly = (value: string) => new RegExp(`^${escapeRegex(value)}$`, "i");
-
-// populate() puts the company document in companyId; expose it as `company` instead
-function withCompany(job: object) {
-  const { companyId: company, ...rest } = job as { companyId?: unknown };
-  return { ...rest, company };
-}
 
 export async function listJobs(req: Request, res: Response) {
   const parsed = listJobsSchema.safeParse(req.query);
@@ -106,12 +103,22 @@ export async function listJobs(req: Request, res: Response) {
   if (query.q) filter.title = { $regex: escapeRegex(query.q), $options: "i" };
   if (query.keywords) filter.$text = { $search: query.keywords };
   if (query.location) filter.location = { $regex: escapeRegex(query.location), $options: "i" };
-  if (query.department?.length) filter.departments = { $in: query.department.map(exactly) };
+  if (query.department) filter.departments = exactly(query.department);
   if (query.country?.length) filter.countries = { $in: query.country.map(exactly) };
   if (query.workplace?.length) filter.workplace = { $in: query.workplace };
   if (query.seniority?.length) filter.seniority = { $in: query.seniority };
   if (query.postedWithin) {
     filter.firstPublishedAt = { $gte: new Date(Date.now() - query.postedWithin * 86_400_000) };
+  }
+
+  // Logged-in users don't see jobs they marked "Not interested"
+  if (req.user?.id) {
+    const hidden = await db
+      .select({ jobId: hiddenJobs.jobId })
+      .from(hiddenJobs)
+      .where(eq(hiddenJobs.userId, req.user.id));
+    const hiddenIds = hidden.map((row) => row.jobId).filter((id) => isValidObjectId(id));
+    if (hiddenIds.length) filter._id = { $nin: hiddenIds };
   }
 
   // Company and sponsor-route filters live on companies; both narrow the allowed companyIds

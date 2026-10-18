@@ -39,4 +39,18 @@ const verifyToken: RequestHandler = async (req, res, next) => {
   next();
 };
 
+// For public routes that show more to logged-in users (e.g. hiding their "Not interested" jobs):
+// sets req.user when the login cookie is valid, otherwise just carries on without a user
+export const optionalAuth: RequestHandler = async (req, _res, next) => {
+  const userId = getUserId(req.cookies?.[TOKEN_COOKIE]);
+  if (userId) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { passwordHash: false },
+    });
+    if (user) req.user = user;
+  }
+  next();
+};
+
 export default verifyToken;

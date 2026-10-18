@@ -28,6 +28,7 @@
     "scrape:setup": "python3 -m venv scraper/.venv && scraper/.venv/bin/pip install -r scraper/requirements.txt"
   },
   "dependencies": {
+    "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^18.0.8",
@@ -37,7 +38,9 @@
     "express-rate-limit": "^8.7.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.2",
+    "multer": "^2.4.0",
     "pg": "^8.23.1",
+    "unpdf": "^1.9.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -46,6 +49,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.3.0",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",

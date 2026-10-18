@@ -96,6 +96,142 @@ e.g. `/profile/skills/React`, `/profile/skills/UI%2FUX%20Design`
 `400` `{ "status": 400, "message": "New password must be different from current password" }`
 `401` `{ "status": 401, "message": "Current password is incorrect" }`
 
+### GET `/profile/universities`
+
+`200` `{ "status": 200, "message": "Universities fetched", "universities": [ ... ] }`
+
+### POST `/profile/universities`
+
+```json
+{
+  "university": "University of Glasgow",
+  "course": "Computing Science",
+  "courseType": "undergraduate",
+  "status": "expected",
+  "graduationDate": "2027-06-30"
+}
+```
+
+`courseType`: `undergraduate` / `postgraduate` / `phd` / `other`
+`status`: `graduated` / `not_graduated` / `expected` · `graduationDate` optional
+
+`201` `{ "status": 201, "message": "University added", "university": { "id": "uuid", ... } }`
+`400` `{ "status": 400, "message": "Course is required" }`
+
+### PATCH `/profile/universities/:id`
+
+Any of the fields above, e.g. `{ "status": "graduated", "graduationDate": "2026-06-30" }`
+
+`200` `{ "status": 200, "message": "University updated", "university": { ... } }`
+`404` `{ "status": 404, "message": "University not found" }`
+
+### DELETE `/profile/universities/:id`
+
+`200` `{ "status": 200, "message": "University removed" }`
+
+### GET `/profile/saved-jobs`
+
+`200`
+
+```json
+{
+  "status": 200,
+  "message": "Saved jobs fetched",
+  "savedJobs": [
+    {
+      "jobId": "6ad3...",
+      "jobTitle": "Credit Risk Manager",
+      "companyName": "Monzo",
+      "jobUrl": "https://...",
+      "savedAt": "...",
+      "job": { "...same as /jobs list, or null if taken down": "" }
+    }
+  ]
+}
+```
+
+### POST `/profile/saved-jobs`
+
+```json
+{ "jobId": "6ad3aa8b9b08380fc5459c06" }
+```
+
+`201` `{ "status": 201, "message": "Job saved", "savedJob": { ... } }`
+`404` `{ "status": 404, "message": "Job not found" }`
+`409` `{ "status": 409, "message": "Job already saved" }`
+
+### DELETE `/profile/saved-jobs/:jobId`
+
+`200` `{ "status": 200, "message": "Job removed from saved" }`
+
+### GET `/profile/hidden-jobs`
+
+"Not interested" jobs. They're left out of `GET /jobs` for this user.
+
+`200` `{ "status": 200, "message": "Hidden jobs fetched", "hiddenJobs": [{ "jobId", "jobTitle", "companyName", "hiddenAt" }] }`
+
+### POST `/profile/hidden-jobs`
+
+```json
+{ "jobId": "6ad3aa8b9b08380fc5459c06" }
+```
+
+`201` `{ "status": 201, "message": "Job hidden", "hiddenJob": { ... } }`
+`409` `{ "status": 409, "message": "Job already hidden" }`
+
+### DELETE `/profile/hidden-jobs/:jobId`
+
+`200` `{ "status": 200, "message": "Job shown again" }`
+
+### GET `/profile/applications`
+
+`200` `{ "status": 200, "message": "Applications fetched", "applications": [{ "jobId", "jobTitle", "companyName", "jobUrl", "status", "appliedAt", "updatedAt", "job" }] }`
+
+### POST `/profile/applications`
+
+```json
+{ "jobId": "6ad3aa8b9b08380fc5459c06", "status": "applied" }
+```
+
+`status` (optional, default `applied`): `applied` / `online_assessment` / `interview` / `assessment_centre` / `offer` / `rejected` / `withdrawn`
+
+`201` `{ "status": 201, "message": "Application added", "application": { ... } }`
+`409` `{ "status": 409, "message": "You've already added this application" }`
+
+### PATCH `/profile/applications/:jobId`
+
+```json
+{ "status": "online_assessment" }
+```
+
+`200` `{ "status": 200, "message": "Status updated", "application": { ... } }`
+`404` `{ "status": 404, "message": "Application not found" }`
+
+### DELETE `/profile/applications/:jobId`
+
+`200` `{ "status": 200, "message": "Application removed" }`
+
+### GET `/profile/resume`
+
+`200` `{ "status": 200, "message": "CV fetched", "resume": { "name": "cv.pdf", "uploadedAt": "...", "keywords": ["Python", "React", "payments"], "downloadUrl": "https://api.cloudinary.com/... (works for 10 minutes)" } }`
+`404` `{ "status": 404, "message": "You haven't uploaded a CV yet" }`
+
+### PUT `/profile/resume`
+
+Body: `form-data`, key `resume` (type File), a PDF up to 5 MB. Replaces any earlier CV.
+
+`200` `{ "status": 200, "message": "CV uploaded", "resume": { ... } }`
+`400` `{ "status": 400, "message": "Your CV must be a PDF" }`
+`400` `{ "status": 400, "message": "We couldn't find any text in this PDF. If it's a scan, upload one made from a document instead" }`
+`413` `{ "status": 413, "message": "Your CV must be 5 MB or smaller" }`
+`503` `{ "status": 503, "message": "CV uploads aren't set up on this server yet" }`
+
+### DELETE `/profile/resume`
+
+`200` `{ "status": 200, "message": "CV removed" }`
+
+Jobs that fit the CV: `GET /jobs?keywords=<resume keywords joined by spaces>&sort=relevance` (the keywords are also on the user as `resumeKeywords`).
+
 ---
 
 ## Skills
@@ -110,6 +246,8 @@ e.g. `/profile/skills/React`, `/profile/skills/UI%2FUX%20Design`
 
 ### GET `/jobs`
 
+When logged in, jobs you marked "Not interested" are left out.
+
 All query params optional:
 
 | Param          | Example                                                    |
@@ -120,7 +258,7 @@ All query params optional:
 | `workplace`    | `remote,hybrid,onsite`                                     |
 | `country`      | `united kingdom,ireland`                                   |
 | `location`     | `manchester`                                               |
-| `department`   | `engineering`                                              |
+| `department`   | `engineering` (one department)                             |
 | `company`      | `monzo,stripe`                                             |
 | `route`        | `skilled-worker` / `global-business-mobility` / `scale-up` |
 | `postedWithin` | `7` (days, 1–365)                                          |
@@ -153,6 +291,7 @@ e.g. `/jobs?sponsors=true&uk=true&seniority=intern,graduate`
       "url": "https://job-boards.greenhouse.io/...",
       "firstPublishedAt": "...",
       "updatedAt": "...",
+      "closingDate": "2026-11-01T00:00:00.000Z (or null when the company gives no closing date)",
       "company": {
         "_id": "...",
         "name": "Deliveroo",

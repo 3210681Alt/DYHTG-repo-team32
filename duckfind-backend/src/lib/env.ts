@@ -17,6 +17,11 @@ const envSchema = z.object({
   // Scraped companies and jobs (written by scraper/)
   MONGODB_URI: z.string().min(1).default("mongodb://localhost:27017"),
   MONGODB_DB: z.string().min(1).default("duckfind"),
+
+  // CV uploads (lib/cloudinary.ts). Optional: without them, uploading says it isn't set up yet.
+  CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
+  CLOUDINARY_API_KEY: z.string().min(1).optional(),
+  CLOUDINARY_API_SECRET: z.string().min(1).optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

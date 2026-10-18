@@ -18,6 +18,11 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   skills: text("skills").array().notNull().default([]),
   resumeUrl: text("resume_url"),
+  // The uploaded CV (stored privately on Cloudinary, see lib/cloudinary.ts)
+  resumeName: text("resume_name"),
+  // Words found in the CV, used to find matching jobs
+  resumeKeywords: text("resume_keywords").array().notNull().default([]),
+  resumeUploadedAt: timestamp("resume_uploaded_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

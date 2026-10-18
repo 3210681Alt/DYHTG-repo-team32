@@ -24,6 +24,8 @@ class Job:
     seniority: str = "mid"  # intern / graduate / junior / mid / senior / lead
     first_published_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    # When applications close, if the company says (see closing_date_for in extract.py)
+    closing_date: Optional[datetime] = None
 
     def to_document(self) -> Dict[str, Any]:
         # companyId, sponsorsVisa and lastSeenAt are added when the job is saved (see db.py)
@@ -42,4 +44,5 @@ class Job:
             "seniority": self.seniority,
             "firstPublishedAt": self.first_published_at,
             "updatedAt": self.updated_at,
+            "closingDate": self.closing_date,
         }

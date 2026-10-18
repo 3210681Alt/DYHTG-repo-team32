@@ -8,6 +8,20 @@
       "when": 1792243402602,
       "tag": "0000_true_talos",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792284982622,
+      "tag": "0001_same_speed",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792287129189,
+      "tag": "0002_absurd_menace",
+      "breakpoints": true
     }
   ]
 }

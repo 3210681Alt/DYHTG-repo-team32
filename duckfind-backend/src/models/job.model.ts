@@ -21,6 +21,8 @@ const jobSchema = new Schema(
     firstPublishedAt: Date,
     // When Greenhouse last updated the listing
     updatedAt: Date,
+    // When applications close, if the company says (scraper/extract.py closing_date_for)
+    closingDate: Date,
     sponsorsVisa: Boolean,
     lastSeenAt: Date,
   },
